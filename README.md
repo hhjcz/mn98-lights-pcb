@@ -15,12 +15,17 @@ footprint. P6DC wiring is:
 | 3 | LEFT |
 | 4 | RIGHT |
 | 5 | BRAKE |
-| 6 | BACK-UP |
-| 7 | DRL |
-| 8 | FLASH |
+| 6 | FLASH |
+| 7 | BACK-UP |
+| 8 | DRL |
 
 Pins 1 and 2 are connected to the same 1.2 mm common-positive spine. LED
 connector pad 1 is COMMON+ and pad 2 is the controlled P6DC channel.
+
+Pins 3--8 follow the top-to-bottom order of the P6DC light outputs in the
+manual: P6DC [14] left cornering, [15] right cornering, [16] brake, [17]
+flash, [18] back-up, and [19] daytime running light. Terminate the chassis
+cable as J14 pin-to-pin; do not reverse its conductor order between plugs.
 
 ## LED outputs
 

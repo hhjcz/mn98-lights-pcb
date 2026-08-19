@@ -27,13 +27,17 @@ J14 is an eight-position right-angle JST-PH connector:
 | 3 | LEFT |
 | 4 | RIGHT |
 | 5 | BRAKE |
-| 6 | BACK-UP |
-| 7 | DRL |
-| 8 | FLASH |
+| 6 | FLASH |
+| 7 | BACK-UP |
+| 8 | DRL |
 
 Pins 1 and 2 must be connected together on the PCB. They feed every LED
 connector's pad 1 via a wide common-positive spine. There is no ground net:
 each LED's pad 2 is its P6DC controlled return/channel.
+
+Pins 3--8 must preserve the top-to-bottom P6DC light-output order [14]--[19]:
+left cornering, right cornering, brake, flash, back-up, and DRL. The chassis
+cable is a pin-to-pin harness; never reverse its conductor order between plugs.
 
 ## Output Assignment
 

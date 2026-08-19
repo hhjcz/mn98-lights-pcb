@@ -115,7 +115,7 @@ def main():
         board, JST_LIB, "JST_PH_S8B-PH-K_1x08_P2.00mm_Horizontal",
         "J14", "P6DC INPUT", 8.0, 38.5, 180,
     )
-    input_nets = ("COMMON+", "COMMON+", "LEFT", "RIGHT", "BRAKE", "BACK-UP", "DRL", "FLASH")
+    input_nets = ("COMMON+", "COMMON+", "LEFT", "RIGHT", "BRAKE", "FLASH", "BACK-UP", "DRL")
     for pin, net_name in enumerate(input_nets, 1):
         connect_pad(input_fp, pin, nets[net_name])
 
@@ -151,8 +151,8 @@ def main():
     # Routed B.Cu signal trunks. Jumper-selected loads terminate at the centre pad.
     sources = {
         "LEFT": pad_pos(input_fp, 3), "RIGHT": pad_pos(input_fp, 4),
-        "BRAKE": pad_pos(input_fp, 5), "BACK-UP": pad_pos(input_fp, 6),
-        "DRL": pad_pos(input_fp, 7), "FLASH": pad_pos(input_fp, 8),
+        "BRAKE": pad_pos(input_fp, 5), "FLASH": pad_pos(input_fp, 6),
+        "BACK-UP": pad_pos(input_fp, 7), "DRL": pad_pos(input_fp, 8),
         "MARKER": pad_pos(jp1, 2), "REAR_RED": pad_pos(jp2, 1), "RAMP": pad_pos(jp3, 2),
     }
     lanes = {"LEFT": 7.0, "RIGHT": 9.0, "BRAKE": 17.0, "BACK-UP": 19.0,
@@ -192,7 +192,7 @@ def main():
     add_text(board, "JP1: DRL-MARKER-FLASH", 15, 16.0, 0.75)
     add_text(board, "JP2: REAR RED SELECT", 15, 27.8, 0.75)
     add_text(board, "JP3: DRL-RAMP-FLASH", 15, 29.0, 0.75)
-    add_text(board, "P6DC: 1/2 +, 3 L, 4 R, 5 B, 6 REV, 7 DRL, 8 FLASH", 15, 36.7, 0.65)
+    add_text(board, "P6DC: 1/2 +, 3 L, 4 R, 5 B, 6 FLASH, 7 REV, 8 DRL", 15, 36.7, 0.65)
 
     pcbnew.SaveBoard(str(OUT), board)
 
