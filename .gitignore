@@ -3,3 +3,6 @@
 fp-info-cache
 *-backups/
 ~*.lck
+
+# KiCad netlist validation artifact
+schematic.net

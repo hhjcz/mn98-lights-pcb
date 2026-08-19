@@ -2,6 +2,7 @@
 """Generate the compact passive MN98 light-distribution PCB."""
 
 from pathlib import Path
+from uuid import NAMESPACE_URL, uuid5
 
 import pcbnew
 
@@ -16,6 +17,11 @@ def mm(x, y):
     return pcbnew.VECTOR2I(pcbnew.FromMM(x), pcbnew.FromMM(y))
 
 
+def schematic_path(reference):
+    symbol_uuid = uuid5(NAMESPACE_URL, f"mn98-lights-pcb/schematic/{reference}")
+    return f"/{symbol_uuid}"
+
+
 def add_net(board, name):
     net = pcbnew.NETINFO_ITEM(board, name)
     board.Add(net)
@@ -28,6 +34,7 @@ def add_footprint(board, library, name, ref, value, x, y, rotation=0):
         raise RuntimeError(f"Missing footprint: {library}/{name}")
     footprint.SetReference(ref)
     footprint.SetValue(value)
+    footprint.SetPath(pcbnew.KIID_PATH(schematic_path(ref)))
     footprint.SetPosition(mm(x, y))
     footprint.SetOrientationDegrees(rotation)
     board.Add(footprint)
