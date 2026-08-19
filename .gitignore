@@ -1,0 +1,5 @@
+# KiCad per-user and generated workspace state
+*.kicad_prl
+fp-info-cache
+*-backups/
+~*.lck
