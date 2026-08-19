@@ -113,7 +113,7 @@ def main():
 
     input_fp = add_footprint(
         board, JST_LIB, "JST_PH_S8B-PH-K_1x08_P2.00mm_Horizontal",
-        "J14", "P6DC INPUT", 8.0, 38.5, 180,
+        "J14", "P6DC INPUT", 27.0, 36.3, 180,
     )
     input_nets = ("COMMON+", "COMMON+", "LEFT", "RIGHT", "BRAKE", "FLASH", "BACK-UP", "DRL")
     for pin, net_name in enumerate(input_nets, 1):
@@ -141,12 +141,14 @@ def main():
     connect_pad(jp2, 6, nets["BACK-UP"])
 
     # Common positive is deliberately routed on F.Cu with a 1.2 mm spine.
-    common_points = [pad_pos(input_fp, 1), (8.0, 35.0), (15.0, 35.0), (15.0, 5.0)]
+    common_pin_1 = pad_pos(input_fp, 1)
+    common_pin_2 = pad_pos(input_fp, 2)
+    common_points = [common_pin_1, (common_pin_1[0], 35.0), (15.0, 35.0), (15.0, 5.0)]
     add_track(board, nets["COMMON+"], common_points, 1.2, pcbnew.F_Cu)
     for fp in led.values():
         pos = pad_pos(fp, 1)
         add_track(board, nets["COMMON+"], [(15.0, pos[1]), pos], 0.8, pcbnew.F_Cu)
-    add_track(board, nets["COMMON+"], [pad_pos(input_fp, 2), (10.0, 35.0), (15.0, 35.0)], 1.2, pcbnew.F_Cu)
+    add_track(board, nets["COMMON+"], [common_pin_2, (common_pin_2[0], 35.0), (15.0, 35.0)], 1.2, pcbnew.F_Cu)
 
     # Routed B.Cu signal trunks. Jumper-selected loads terminate at the centre pad.
     sources = {
