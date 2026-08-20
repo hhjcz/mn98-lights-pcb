@@ -1,70 +1,27 @@
-# MN98 light distribution PCB
+# MN98 Lights PCB
 
-Passive 30 x 40 mm, two-layer FR-4 adapter for the MN98 body lighting and
-DumboRC P6DC. The board contains no active components and has no GND net.
+Passive body-light distribution boards for the MN98 RC car and DumboRC P6DC
+receiver. The P6DC already controls the LEDs, so variants in this repository
+must not add transistors, MOSFETs, resistors, regulators, capacitors, or GND.
 
-## Input J14
+## Shared P6DC Interface
 
-J14 is an 8-position right-angle JST-PH connector. Pin 1 is marked on the
-footprint. P6DC wiring is:
+The receiver manual is in `docs/`. The light channels follow the P6DC physical
+output order: left cornering, right cornering, brake, flash, back-up, and
+daytime running light. Any detachable body-to-chassis cable must preserve that
+order without crossed conductors.
 
-| Pin | Net |
-| --- | --- |
-| 1 | COMMON+ |
-| 2 | COMMON+ |
-| 3 | LEFT |
-| 4 | RIGHT |
-| 5 | BRAKE |
-| 6 | FLASH |
-| 7 | BACK-UP |
-| 8 | DRL |
+Before connecting a body harness, confirm LED polarity with a meter. Do not
+infer it from wire colours or connector orientation.
 
-Pins 1 and 2 are connected to the same 1.2 mm common-positive spine. LED
-connector pad 1 is COMMON+ and pad 2 is the controlled P6DC channel.
+## Archived JST-PH Variant
 
-Pins 3--8 follow the top-to-bottom order of the P6DC light outputs in the
-manual: P6DC [14] left cornering, [15] right cornering, [16] brake, [17]
-flash, [18] back-up, and [19] daytime running light. Terminate the chassis
-cable as J14 pin-to-pin; do not reverse its conductor order between plugs.
+`v1.0-jst-ph/` contains the original JST-PH work-in-progress, including its
+KiCad project, Gerbers, PDFs, connector-specific documentation and skill.
+It is preserved as a reference and must not be overwritten by the next design.
 
-## LED outputs
+## Next Variant
 
-| Connector | Function | Controlled net |
-| --- | --- | --- |
-| J1 | Left front turn | LEFT |
-| J2 | Right front turn | RIGHT |
-| J3 | Left rear turn | LEFT |
-| J4 | Right rear turn | RIGHT |
-| J5 | Spare | FLASH |
-| J6 | Left 5 mm headlight | DRL |
-| J7 | Left 3 mm marker | MARKER via JP1 |
-| J8 | Left rear red | REAR_RED via JP2 |
-| J9 | Roof ramp | RAMP via JP3 |
-| J10 | Right 5 mm headlight | DRL |
-| J11 | Right 3 mm marker | MARKER via JP1 |
-| J12 | Right rear red | REAR_RED via JP2 |
-| J13 | Spare | DRL |
-
-All J1--J13 are right-angle JST-PH S2B-PH-K footprints.
-
-## Jumper settings
-
-JP1 and JP3 are 1x03 headers. Fit one 2.54 mm shunt between the centre pin
-and the selected outside pin.
-
-| Jumper | Left position | Right position |
-| --- | --- | --- |
-| JP1 | DRL -> MARKER | MARKER -> FLASH |
-| JP3 | DRL -> RAMP | RAMP -> FLASH |
-
-JP2 is a 2x03 header. Fit one vertical 2.54 mm shunt in the column labelled
-DRL, BRAKE, or BACK-UP to connect that channel to both rear-red connectors.
-
-## Before manufacturing
-
-1. Check that 30 x 40 mm fits the exact available MN98 body cavity.
-2. Check the mating housing and the actual pin-1/polarity of every MN98 LED
-   lead. Do not infer it from lead colours or connector orientation.
-3. Open `pcb-svetla-mn98.kicad_pcb` in KiCad PCB Editor, run DRC, and resolve
-   the two JP2 ratsnest indicators before ordering. The generated Gerbers are
-   an inspection aid, not a released fabrication package.
+The repository root is reserved for a new design based on paired LED lights
+with 2-pin Dupont female connectors. Keep it as an independent KiCad project
+so both connector strategies remain maintainable side by side.
