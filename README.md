@@ -25,3 +25,22 @@ It is preserved as a reference and must not be overwritten by the next design.
 The repository root is reserved for a new design based on paired LED lights
 with 2-pin Dupont female connectors. Keep it as an independent KiCad project
 so both connector strategies remain maintainable side by side.
+
+## Dupont Variant, First Revision
+
+`pcb-svetla-mn98.kicad_sch` and `pcb-svetla-mn98.kicad_pcb` are the first
+compact passive version. The board uses a right-angle JST-XH 1x8 P6DC harness
+input and three right-angle 2.54 mm male headers for the paired Dupont LEDs:
+the initial placement is 32 x 42 mm, dominated by the XH connector's body.
+
+| Header | Physical pairs, top to bottom |
+| --- | --- |
+| J1, 1x4 | `COMMON+ / LEFT`, `COMMON+ / RIGHT` |
+| J2, 1x6 | `COMMON+ / DRL`, `COMMON+ / BRAKE`, `COMMON+ / BACK-UP` |
+| J3, 1x6 | `COMMON+ / MARKER`, `COMMON+ / RAMP`, `COMMON+ / SPARE` |
+
+JP1, JP2 and JP3 select `DRL` or `FLASH` respectively for MARKER, RAMP and
+SPARE. Fit the shunt across pins 1-2 for DRL, or 2-3 for FLASH. All right-angle
+connectors face outward from the board. The headers are intentionally unkeyed:
+silkscreen marks the common-positive side of every pair. Confirm the supplied
+LED pair polarity before connecting power.
