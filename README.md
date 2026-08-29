@@ -20,27 +20,50 @@ infer it from wire colours or connector orientation.
 KiCad project, Gerbers, PDFs, connector-specific documentation and skill.
 It is preserved as a reference and must not be overwritten by the next design.
 
-## Next Variant
-
-The repository root is reserved for a new design based on paired LED lights
-with 2-pin Dupont female connectors. Keep it as an independent KiCad project
-so both connector strategies remain maintainable side by side.
-
-## Dupont Variant, First Revision
+## Dupont Body Distributor
 
 `pcb-svetla-mn98.kicad_sch` and `pcb-svetla-mn98.kicad_pcb` are the first
-compact passive version. The board uses a right-angle JST-XH 1x8 P6DC harness
-input and three right-angle 2.54 mm male headers for the paired Dupont LEDs:
-the initial placement is 32 x 42 mm, dominated by the XH connector's body.
+compact passive body-side distributor. The current placement candidate is
+32 x 36 mm, within the verified 40 x 50 mm maximum envelope. It uses two
+merged right-angle 2.54 mm male headers for paired Dupont LEDs. The left header
+contains LEFT TURN and DRL. The right header contains RIGHT TURN, BRAKE,
+BACK-UP, MARKER, RAMP and SPARE. Both JST-PH body-link connectors exit left so
+their harnesses run toward the same chassis location.
+All connector courtyards are inside the board outline. Routing is intentionally
+deferred until the mechanical placement and JST-PH orientation are approved.
+The JST-PH courtyards are inset 2.5 mm from the left edge to protect the
+connectors and leave board material around their through-hole pads.
 
 | Header | Physical pairs, top to bottom |
 | --- | --- |
-| J1, 1x4 | `COMMON+ / LEFT`, `COMMON+ / RIGHT` |
-| J2, 1x6 | `COMMON+ / DRL`, `COMMON+ / BRAKE`, `COMMON+ / BACK-UP` |
-| J3, 1x6 | `COMMON+ / MARKER`, `COMMON+ / RAMP`, `COMMON+ / SPARE` |
+| J1, 1x4 | `COMMON+ / LEFT`, `COMMON+ / DRL` |
+| J2, 1x12 | `COMMON+ / RIGHT`, `COMMON+ / BRAKE`, `COMMON+ / BACK-UP`, `COMMON+ / MARKER`, `COMMON+ / RAMP`, `COMMON+ / SPARE` |
 
 JP1, JP2 and JP3 select `DRL` or `FLASH` respectively for MARKER, RAMP and
 SPARE. Fit the shunt across pins 1-2 for DRL, or 2-3 for FLASH. All right-angle
 connectors face outward from the board. The headers are intentionally unkeyed:
 silkscreen marks the common-positive side of every pair. Confirm the supplied
 LED pair polarity before connecting power.
+
+### Body Link
+
+The detachable body link uses two right-angle JST-PH 1x4 THT connectors. Pin 1
+is `COMMON+` on both connectors, so swapping cables A and B cannot connect a
+signal output to common positive; it only exchanges light functions.
+
+| Connector | Pin 1 | Pin 2 | Pin 3 | Pin 4 |
+| --- | --- | --- | --- | --- |
+| J14, link A | `COMMON+` | `LEFT` | `RIGHT` | `BRAKE` |
+| J15, link B | `COMMON+` | `FLASH` | `BACK-UP` | `DRL` |
+
+Use pin-to-pin female-female harnesses. A practical custom-length harness can
+be made from two pre-crimped JST-PH 4-pin pigtails joined wire-for-wire. Verify
+continuity and pin order with a meter before connecting the receiver.
+
+### Planned P6DC Adapter
+
+A second passive PCB will plug into the six 2-pin P6DC light outputs through a
+2x6 Dupont female socket and expose matching J14/J15 JST-PH connectors. It
+will join the P6DC common-positive pins and preserve the pinout above. The
+adapter is intentionally deferred until its fit against the receiver has been
+measured. Both designs may later share one customer-panel PCB for fabrication.

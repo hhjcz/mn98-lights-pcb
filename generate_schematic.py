@@ -57,8 +57,8 @@ def connector_lib(name, count, input_side="right"):
 
 LIB_1X3 = connector_lib("Conn_01x03", 3)
 LIB_1X4 = connector_lib("Conn_01x04", 4)
-LIB_1X6 = connector_lib("Conn_01x06", 6)
-LIB_1X8_INPUT = connector_lib("Conn_01x08_Input", 8, "left")
+LIB_1X12 = connector_lib("Conn_01x12", 12)
+LIB_1X4_INPUT = connector_lib("Conn_01x04_Input", 4, "left")
 
 
 def instance(lib_id, reference, value, footprint, x, y, pins):
@@ -109,24 +109,26 @@ def output_connector(items, labels, reference, value, x, y, nets):
 def main():
     items, labels, wires = [], [], []
 
-    # The board silkscreen identifies each physical COMMON+ / channel pair.
-    # J1 and J2 are rotated towards the left board edge, so their electrical
-    # pin order is reversed relative to the visible top-to-bottom pair order.
-    output_connector(items, labels, "J1", "TURN PAIRS", 35, 55,
-                     ("RIGHT", "COMMON+", "LEFT", "COMMON+"))
-    output_connector(items, labels, "J2", "MAIN LIGHTS", 35, 80,
-                     ("BACK-UP", "COMMON+", "BRAKE", "COMMON+", "DRL", "COMMON+"))
-    output_connector(items, labels, "J3", "AUX LIGHTS", 120, 55,
-                     ("COMMON+", "MARKER", "COMMON+", "RAMP", "COMMON+", "SPARE"))
+    # Each body side uses one merged Dupont header. The tuples account for J1
+    # facing left and J2 facing right while keeping every physical pair +/signal.
+    output_connector(items, labels, "J1", "LEFT LIGHT PORTS", 35, 60,
+                     ("DRL", "COMMON+", "LEFT", "COMMON+"))
+    output_connector(items, labels, "J2", "RIGHT LIGHT PORTS", 120, 55,
+                     ("COMMON+", "RIGHT", "COMMON+", "BRAKE", "COMMON+",
+                      "BACK-UP", "COMMON+", "MARKER", "COMMON+", "RAMP",
+                      "COMMON+", "SPARE"))
 
-    items.append(instance("Conn_01x08_Input", "J14", "P6DC INPUT",
-                          "Connector_JST:JST_XH_S8B-XH-A_1x08_P2.50mm_Horizontal",
-                          210, 82, tuple(str(i) for i in range(1, 9))))
-    input_nets = ("COMMON+", "COMMON+", "LEFT", "RIGHT", "BRAKE", "FLASH", "BACK-UP", "DRL")
-    for pin, net in enumerate(input_nets, 1):
-        y = 82 - (8 - pin) * 2.54
-        wires.append(wire(204.92, y, 192, y))
-        labels.append(label(net, 192, y, 180, "right"))
+    for reference, value, y, input_nets in (
+        ("J14", "BODY LINK A", 75, ("COMMON+", "LEFT", "RIGHT", "BRAKE")),
+        ("J15", "BODY LINK B", 110, ("COMMON+", "FLASH", "BACK-UP", "DRL")),
+    ):
+        items.append(instance("Conn_01x04_Input", reference, value,
+                              "Connector_JST:JST_PH_S4B-PH-K_1x04_P2.00mm_Horizontal",
+                              210, y, tuple(str(i) for i in range(1, 5))))
+        for pin, net in enumerate(input_nets, 1):
+            pin_y = y - (4 - pin) * 2.54
+            wires.append(wire(204.92, pin_y, 192, pin_y))
+            labels.append(label(net, 192, pin_y, 180, "right"))
 
     for reference, value, y, output_net in (
         ("JP1", "MARKER: DRL / FLASH", 120, "MARKER"),
@@ -145,8 +147,8 @@ def main():
   (lib_symbols
 {LIB_1X3}
 {LIB_1X4}
-{LIB_1X6}
-{LIB_1X8_INPUT}
+{LIB_1X12}
+{LIB_1X4_INPUT}
   )
 {chr(10).join(items)}
 {chr(10).join(wires)}
@@ -163,7 +165,11 @@ def main():
     (effects (font (size 1.27 1.27)))
     (uuid {uid()})
   )
-  (text "J14: 1/2 COMMON+, 3 LEFT, 4 RIGHT, 5 BRAKE, 6 FLASH, 7 BACK-UP, 8 DRL. Body harness is wired pin-to-pin." (at 110 172 0)
+  (text "J14/A: 1 COMMON+, 2 LEFT, 3 RIGHT, 4 BRAKE. J15/B: 1 COMMON+, 2 FLASH, 3 BACK-UP, 4 DRL." (at 110 172 0)
+    (effects (font (size 1.27 1.27)))
+    (uuid {uid()})
+  )
+  (text "Both JST-PH harnesses are wired pin-to-pin. Swapping A and B keeps COMMON+ on pin 1 but exchanges light functions." (at 110 179 0)
     (effects (font (size 1.27 1.27)))
     (uuid {uid()})
   )
