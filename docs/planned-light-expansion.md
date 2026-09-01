@@ -20,9 +20,8 @@ The intended future revision would:
 - omit the P6DC FLASH output, which is a true strobe function not currently
   needed on the MN98;
 - use semantic body-light names instead of names copied from the P6DC manual;
-- allow ROOF LIGHT and FRONT MARKER to follow HEADLIGHTS or use separate
-  outputs of a three-channel RC light switch;
-- connect SPARE to the remaining output of that switch;
+- allow ROOF LIGHT, FRONT MARKER, and SPARE to follow HEADLIGHTS or use the
+  common output of a CH3 RC light switch;
 - remain a passive PCB containing only connectors, copper routing, labels, and
   solder-select jumpers.
 
@@ -48,11 +47,15 @@ The connector series, pin 1, conductor order, continuity, and polarity must all
 be checked on the delivered part. The listing is not sufficient evidence for
 an electrical pinout.
 
-### DumboRC three-channel light controller
+### DumboRC CH3 light controller
 
 Product page:
 
 <https://www.aliexpress.com/item/1005005666804975.html>
+
+Installation video showing the same type of module:
+
+<https://www.youtube.com/watch?v=yQgD09w_WAs>
 
 Local reference images copied from the product listing:
 
@@ -63,29 +66,39 @@ Local reference images copied from the product listing:
 - [`ddf350-3ch-switch-output.webp`](ddf350-3ch-switch-output.webp)
 - [`ddf350-3ch-switch-angle.webp`](ddf350-3ch-switch-angle.webp)
 
-The listing calls this a `3CH LED Light Controller` and shows:
+The listing calls this a `3CH LED Light Controller`, while the installation
+video calls it a `Ch3 Light Control Module`. The latter interpretation is much
+more consistent with the visible wiring: the controller is intended for the
+receiver's CH3 output rather than providing three independently controlled LED
+channels.
+
+The listing and video show:
 
 - one three-wire female JR receiver lead;
-- one four-pin 2.54 mm male output;
+- one four-pin 2.54 mm male output, apparently arranged as two 2-pin LED ports;
 - an approximately 24 x 10 mm controller body;
 - approximately 120 mm overall length including the receiver lead;
 - advertised on, off, breathing, and flashing effects.
 
-The photographs appear to mark the four-pin output as three switched negative
-channels plus one common positive. The working hypothesis is therefore:
+The working hypothesis is that the four pins are two electrically parallel
+copies of the same switched LED output:
 
 ```text
-SWITCH CH1- | SWITCH CH2- | SWITCH CH3- | SWITCH+
+SWITCH PORT 1: + / -
+SWITCH PORT 2: + / -
 ```
 
-Neither the order nor the electrical topology is verified. The photographs
-must not be used as the final pinout. The controller may use different output
-ordering, low-side switching, protection components, or a supply path that
-makes its positive output unsuitable for direct connection to P6DC COMMON+.
+Both ports appear to switch together and provide the same effect. They should
+be treated as one electrical source named `SWITCH+ / SWITCH-`, not as separate
+channels. Neither pin order, the parallel connection, nor the electrical
+topology is verified on the delivered unit. The photographs and video must not
+be used as the final pinout. The controller may use different output ordering,
+low-side switching, protection components, or a supply path that makes its
+positive output unsuitable for direct connection to P6DC COMMON+.
 
-`3CH` describes three LED outputs, not three receiver inputs. The module has
-one PWM receiver input. Its firmware likely decodes pulse positions or a
-sequence of transitions to operate the three outputs.
+The module has one PWM receiver input. Its firmware likely decodes pulse
+positions or a sequence of transitions to switch the shared output and select
+on, off, breathing, or flashing modes.
 
 ## Proposed Light Names
 
@@ -98,9 +111,9 @@ Future PCB silkscreen should use the function on the vehicle:
 | `HEADLIGHTS` | Main front lights | P6DC DRL output |
 | `TAIL / BRAKE` | Rear low-intensity tail and high-intensity brake | P6DC brake output |
 | `REVERSE` | Reverse lights | P6DC back-up output |
-| `FRONT MARKER` | Front marker lights | HEADLIGHTS or switch CH2 |
-| `ROOF LIGHT` | Roof light bar | HEADLIGHTS or switch CH1 |
-| `SPARE` | Future auxiliary light | Switch CH3 |
+| `FRONT MARKER` | Front marker lights | HEADLIGHTS or SWITCH |
+| `ROOF LIGHT` | Roof light bar | HEADLIGHTS or SWITCH |
+| `SPARE` | Future auxiliary light | HEADLIGHTS or SWITCH |
 
 The probable P6DC mapping is based on observed behaviour discussed during
 planning. It must be checked across every P6DC light mode before becoming part
@@ -109,8 +122,8 @@ of the schematic specification.
 ## Preferred Electrical Architecture
 
 The preferred architecture assumes that the P6DC light common positive, the
-receiver supply positive, and the three-channel switch output positive are the
-same electrical rail.
+receiver supply positive, and the CH3 switch output positive are the same
+electrical rail.
 
 ```text
 Purchased P6DC adapter, 6 wires
@@ -121,34 +134,38 @@ Purchased P6DC adapter, 6 wires
   REVERSE ----------------------+---------------- REVERSE negative
   HEADLIGHTS -------------------+---------------- HEADLIGHTS negative
                                 |
-Three-channel switch, 4 pins    |
+CH3 switch, two parallel ports  |
   SWITCH+ ----------------------+  only if verified as the same rail
-  CH1- -------- roof selector
-  CH2- -------- marker selector
-  CH3- -------------------------- SPARE negative
+  SWITCH- ------+--------------- roof selector
+                +--------------- marker selector
+                +--------------- spare selector
 ```
 
 With a verified shared positive rail, only the switched negative conductor of
-ROOF LIGHT and FRONT MARKER needs selection:
+each optional light needs selection:
 
 ```text
 ROOF +   ------------------------------ COMMON+
-ROOF -   ---- [ HEADLIGHTS- | CH1- ] --- one 3-pad solder selector
+ROOF -   ---- [ HEADLIGHTS- | SWITCH- ] --- one 3-pad solder selector
 
 MARKER + ------------------------------ COMMON+
-MARKER - -- [ HEADLIGHTS- | CH2- ] ----- one 3-pad solder selector
+MARKER - -- [ HEADLIGHTS- | SWITCH- ] ----- one 3-pad solder selector
 
 SPARE +  ------------------------------ COMMON+
-SPARE -  ------------------------------ CH3-
+SPARE -  --- [ HEADLIGHTS- | SWITCH- ] --- one 3-pad solder selector
 ```
 
 This gives the following intended configurations:
 
-| Output | Default or simple source | Optional independent source |
+| Output | Default or simple source | Alternate shared source |
 | --- | --- | --- |
-| `ROOF LIGHT` | `HEADLIGHTS` | `SWITCH CH1` |
-| `FRONT MARKER` | `HEADLIGHTS` | `SWITCH CH2` |
-| `SPARE` | none | `SWITCH CH3`, fixed |
+| `ROOF LIGHT` | `HEADLIGHTS` | `SWITCH` |
+| `FRONT MARKER` | `HEADLIGHTS` | `SWITCH` |
+| `SPARE` | `HEADLIGHTS` | `SWITCH` |
+
+All outputs selected to `SWITCH` operate together. The PCB may fan the shared
+switch output out to more loads than the module's two physical ports, but their
+combined current must remain within the controller's measured safe capacity.
 
 TAIL/BRAKE is intentionally not a proposed FRONT MARKER source. Connecting the
 front markers to that output would make them change intensity when braking,
@@ -161,18 +178,21 @@ outputs and must be treated as an invalid configuration.
 ## Safe Fallback Architecture
 
 If the two positive outputs are not proven to be the same rail, do not connect
-them. ROOF LIGHT and FRONT MARKER must then use two-pole source selection so
-both LED conductors move together between sources.
+them. ROOF LIGHT, FRONT MARKER, and SPARE must then use two-pole source
+selection so both LED conductors move together between sources.
 
 ```text
 HEADLIGHTS +  [ ]-[ ROOF + ]-[ ]  SWITCH+
-HEADLIGHTS -  [ ]-[ ROOF - ]-[ ]  CH1-
+HEADLIGHTS -  [ ]-[ ROOF - ]-[ ]  SWITCH-
 
 HEADLIGHTS +  [ ]-[ MARKER + ]-[ ] SWITCH+
-HEADLIGHTS -  [ ]-[ MARKER - ]-[ ] CH2-
+HEADLIGHTS -  [ ]-[ MARKER - ]-[ ] SWITCH-
+
+HEADLIGHTS +  [ ]-[ SPARE + ]-[ ]  SWITCH+
+HEADLIGHTS -  [ ]-[ SPARE - ]-[ ]  SWITCH-
 ```
 
-This fallback needs four three-pad solder selectors instead of two. Both rows
+This fallback needs six three-pad solder selectors instead of three. Both rows
 for one light must always be set to the same side. Crossed or double-bridged
 settings are invalid and could connect the P6DC and switch outputs together.
 
@@ -185,7 +205,8 @@ The connector plan is provisional:
 
 - one six-pin JST-PH input for the purchased P6DC light adapter, subject to
   physical connector and pinout verification;
-- one 1x4 2.54 mm female Dupont socket for the three-channel switch output;
+- one 1x4 2.54 mm female Dupont socket for the CH3 switch's two parallel
+  2-pin output ports;
 - existing unkeyed two-pin Dupont body-light outputs with a visible `+` mark.
 
 The switch can potentially plug directly into the PCB socket. Placement must
@@ -199,21 +220,21 @@ chosen before deciding whether the module is direct-mounted or cable-mounted.
 
 ## DDF-350 Control Plan
 
-The three-channel switch should connect to one unused P6DC receiver channel.
-The DDF-350 must generate whatever single-channel PWM command sequence the
-module expects.
+The CH3 switch should connect to one unused P6DC receiver channel. The DDF-350
+must generate whatever single-channel PWM command sequence the module expects.
 
 Possible behaviours include:
 
 - fixed PWM ranges selecting different states;
 - a short transition to an endpoint acting as a button press;
 - sequential state changes on repeated transitions;
-- one global sequence covering all three LED outputs;
+- one sequence controlling both parallel LED ports together;
 - separate commands encoded by different pulse widths.
 
-Do not assume that CH1, CH2, and CH3 can be independently toggled until this is
-demonstrated. Transmitter buttons, switches, endpoints, and mixes should be
-configured only after recording the controller's actual state machine.
+Do not assume that the two physical LED ports can be controlled independently.
+Current evidence indicates that they always operate together. Transmitter
+buttons, switches, endpoints, and mixes should be configured only after
+recording the controller's actual state machine.
 
 ## Verification Procedure
 
@@ -290,7 +311,7 @@ First record the state after power-up and after signal loss. Then test slow PWM
 sweeps, stable endpoint positions, short endpoint pulses, repeated pulses, and
 held commands.
 
-| Input action | CH1 | CH2 | CH3 | Persists after neutral | Notes |
+| Input action | Port 1 | Port 2 | Outputs match | Persists after neutral | Notes |
 | --- | --- | --- | --- | --- | --- |
 | Power on | TBD | TBD | TBD | TBD | |
 | Low endpoint held | TBD | TBD | TBD | TBD | |
@@ -301,9 +322,9 @@ held commands.
 | PWM signal removed | TBD | TBD | TBD | TBD | |
 | Power cycled | TBD | TBD | TBD | TBD | |
 
-For each channel, identify steady on, steady off, breathing, flashing, and any
-sequence dependency. Also check whether the previous state is retained after a
-power cycle.
+Identify steady on, steady off, breathing, flashing, and any sequence
+dependency. Confirm that both ports remain synchronized in every mode and check
+whether the previous state is retained after a power cycle.
 
 ## Mechanical Checks
 
@@ -328,9 +349,9 @@ are recorded and the following decisions are explicit:
 1. Final six-pin adapter pinout and orientation.
 2. Final four-pin switch pinout and mounting method.
 3. Shared-positive or isolated-positive architecture.
-4. Usable CH1, CH2, and CH3 controller behaviour.
-5. Final assignment of controller channels to ROOF LIGHT, FRONT MARKER, and
-   SPARE.
+4. Usable CH3 switch behaviour and confirmation that both output ports match.
+5. Final assignment of the shared SWITCH source to ROOF LIGHT, FRONT MARKER,
+   and SPARE selectors.
 6. Final selector defaults and silkscreen labels.
 
 After approval, the project must return to the placement workflow:
@@ -348,10 +369,11 @@ After approval, the project must return to the placement workflow:
 - Is P6DC DRL the preferred HEADLIGHTS behaviour in every configured mode?
 - Is P6DC BRAKE consistently low-intensity tail plus high-intensity brake?
 - What is the exact four-pin switch output order?
-- Does the switch use three low-side outputs and one common positive?
+- Are the four switch pins two parallel `+ / -` output pairs?
 - Are P6DC COMMON+, receiver positive, and SWITCH+ one electrical rail?
-- Can all three switch outputs be independently controlled from one PWM input?
-- Which output modes and command sequence does the DDF-350 need?
+- Do both physical switch ports remain synchronized in every mode?
+- Which shared output modes and command sequence does the DDF-350 need?
 - Should the switch plug directly into the PCB or use an extension harness?
-- What current can each switch channel safely drive?
-- What should happen to ROOF LIGHT and FRONT MARKER when the switch is absent?
+- What total current can the shared switch output safely drive?
+- What should happen to ROOF LIGHT, FRONT MARKER, and SPARE when the switch is
+  absent?
